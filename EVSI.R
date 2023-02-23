@@ -14,7 +14,7 @@ library(mgcv)
 library(tidyverse)
 
 # MIMIC 
-PSA <- read_csv("PSA.csv", skip = 2)
+PSA <- read_csv("PSA.csv", skip = 2)[,-c(19:22)]
 
 sample_sizes <- c(100, 200, 400, 800, 1600, 3200)
 

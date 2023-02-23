@@ -25,7 +25,7 @@
       <Definition xmi:id="_YhCXdqPGEe2d9qs9E74agQ" Variable="c_oxygen" Value="if(ceiling(t_OxygenDuration) = 1; c_oxygen1; if(ceiling(t_OxygenDuration) = 2; c_oxygen1 + c_oxygen2; if(ceiling(t_OxygenDuration) = 3; c_oxygen1 + c_oxygen2 + c_oxygen3; if(ceiling(t_OxygenDuration) = 4; c_oxygen1 + c_oxygen2 + c_oxygen3 + c_oxygen4; c_oxygen1 + c_oxygen2 + c_oxygen3 + c_oxygen4 + c_oxygen5*(ceiling(t_OxygenDuration)-4)))))" Comment=""/>
       <Definition xmi:id="_YhCXd6PGEe2d9qs9E74agQ" Variable="c_hospital" Value="if(ceiling(t_hospitalDuration) = 1; c_ward1; if(ceiling(t_hospitalDuration) = 2; c_ward1 + c_ward2; if(ceiling(t_hospitalDuration) = 3; c_ward1 + c_ward2 + c_ward3; if(ceiling(t_hospitalDuration) = 4; c_ward1 + c_ward2 + c_ward3 + c_ward4; c_ward1 + c_ward2 + c_ward3 + c_ward4 + c_ward5*(ceiling(t_hospitalDuration)-4)))))" Comment=""/>
       <Definition xmi:id="_YhCXeKPGEe2d9qs9E74agQ" Variable="sex" Value="if(distforce(&quot;d_Uniform&quot;) &lt; d_Sex; 1; 0)" Comment=""/>
-      <Definition xmi:id="_YhCXeaPGEe2d9qs9F64agQ" Variable="HR_final" Value="1" Comment=""/>
+      <Definition xmi:id="_YhCXeaPGEe2d9qs9F64agQ" Variable="HR_final" Value="1 - t_ltd + t_ltd*exp(d_LTDmortalityHR)" Comment=""/>
       <Definition xmi:id="_YhCXeqPGEe2d9qs9F64agQ" Variable="female_proportion_mean" Value="0.45" Comment=""/>
       <Definition xmi:id="_YhCXe6PGEe2d9qs9F64agQ" Variable="female_proportion_sd" Value="0.05" Comment=""/>
       <Definition xmi:id="_YhCXfKPGEe2d9qs9F64agQ" Variable="p_survival" Value="if(threshold = 1; d_thresh1_surv; if(threshold = 2;d_thresh2_surv;if(threshold = 3;d_thresh3_surv;d_thresh4_surv)))" Comment=""/>
@@ -87,10 +87,19 @@
       <Definition xmi:id="_YhCXtKPGEe2d9qs9Qv4agQ" Variable="c_ward5" Value="min(d_ward1;d_ward2;d_ward3;d_ward4;d_ward5)" Comment=""/>
       <Definition xmi:id="_YhCXtaPGEe2d9qs9Ru4agQ" Variable="c_recovery_18to64_iterationMean" Value="dist(6)" Comment=""/>
       <Definition xmi:id="_YhCXtqPGEe2d9qs9Ru4agQ" Variable="c_recovery_65plus_iterationMean" Value="dist(7)" Comment=""/>
+      <Definition xmi:id="_qEM3ILHzEe2ISbHRC9YM_g" Variable="ltdmortality_hr_mean" Value="5.34" Comment=""/>
+      <Definition xmi:id="_qEP6cLHzEe2ISbHRC9YM_g" Variable="ltdmortality_hr_sd" Value="0.2" Comment=""/>
+      <Definition xmi:id="_sQMWQLLzEe2ISbHRidYM_g" Variable="dischargeSurvival_ageHR_mean" Value="2.09" Comment=""/>
+      <Definition xmi:id="_sQOygLLzEe2ISbHRidYM_g" Variable="dischargeSurvival_ageHR_sd" Value="0.3" Comment=""/>
+      <Definition xmi:id="_sQQnsLLzEe2ISbHRjcYM_g" Variable="dischargeSurvival_finalscale" Value="exp(ln(d_dischargeSurvival_scale) - (if(t_currentage &lt; 64;0;1)-0.5)*d_dischargeSurvival_ageHR/d_dischargeSurvival_shape)" Comment=""/>
+      <Definition xmi:id="_sQSc4LLzEe2ISbHRjcYM_g" Variable="dischargeSurvival_scale_mean" Value="16.711" Comment=""/>
+      <Definition xmi:id="_sQUSELLzEe2ISbHRkbYM_g" Variable="dischargeSurvival_scale_sd" Value="3.8" Comment=""/>
+      <Definition xmi:id="_sQWHQLLzEe2ISbHRkbYM_g" Variable="dischargeSurvival_shape_mean" Value="0.4602" Comment=""/>
+      <Definition xmi:id="_sQYjgLLzEe2ISbHRkbYM_g" Variable="dischargeSurvival_shape_sd" Value="0.0376" Comment=""/>
       <Node xmi:id="_YhCXt6PGEe2d9qs9Ru4agQ" NameID="Node3" Label="Threshold Usual care" NodeType="ChanceNode" CloneMasterIndex="1" CloneMasterName="AHRF Hospital Course">
         <MarkovData xmi:id="_YhCXuKPGEe2d9qs9Ru4agQ">
-          <Modification xmi:id="_YhCXuaPGEe2d9qs9Ru4agQ" Tracker="t_currentage" Value="d_Age"/>
           <Modification xmi:id="_YhCXuqPGEe2d9qs9St4agQ" Tracker="threshold" Value="1"/>
+          <Modification xmi:id="_vohkALLzEe2ISbHRlaYM_g" Tracker="t_currentage" Value="min(d_Age;95)"/>
         </MarkovData>
         <Node xmi:id="_YhCXu6PGEe2d9qs9St4agQ" NameID="Node6" Label="Hospital survival" NodeType="ChanceNode" CloneMasterIndex="2" CloneMasterName="IMV">
           <Prob xmi:id="_YhCXvKPGEe2d9qs9St4agQ" Value="p_survival"/>
@@ -121,9 +130,12 @@
                     </MarkovData>
                     <Node xmi:id="_YhCX0KPGEe2d9qs9Wp4agQ" NameID="Node17" Label="lblExit" NodeType="LabelNode">
                       <MarkovData xmi:id="_YhCX0aPGEe2d9qs9Wp4agQ">
-                        <Modification xmi:id="_YhCX0qPGEe2d9qs9Wp4agQ" Tracker="t_lifespan" Value="distforce(&quot;d_Gompertz&quot;)"/>
+                        <Modification xmi:id="_znG5cLLzEe2ISbHRlaYM_g" Tracker="t_lifespan" Value="distforce(&quot;d_dischargeSurvival&quot;)"/>
                       </MarkovData>
                       <Node xmi:id="_YhCX06PGEe2d9qs9Xo4agQ" NameID="Node18" Label="lblExit2" NodeType="TerminalNode">
+                        <MarkovData xmi:id="_1oap4LLzEe2ISbHRlaYM_g">
+                          <Modification xmi:id="_1oap4bLzEe2ISbHRlaYM_g" Tracker="t_lifespan" Value="if((t_lifespan+t_currentage)>100;100-t_currentage;t_lifespan)"/>
+                        </MarkovData>
                         <Payoff xmi:id="_YhCX1KPGEe2d9qs9Xo4agQ" Set="1" Value="c_total"/>
                         <Payoff xmi:id="_YhCX1aPGEe2d9qs9Xo4agQ" Set="2" Value="u_survival*DRlifetime*t_survive"/>
                         <Payoff xmi:id="_YhCX1qPGEe2d9qs9Xo4agQ" Set="3" Value="t_ltd*t_survive"/>
@@ -510,6 +522,31 @@
       <Parameter xmi:id="_YhCZBqPGEe2d9qs9Ur4agQ" Name="alpha" Value="(((tbl_imv_surv[2;1])^2)*(1-(tbl_imv_surv[2;1]))/((tbl_imv_surv[2;2])^2)-(tbl_imv_surv[2;1]))"/>
       <Parameter xmi:id="_YhCZB6PGEe2d9qs9Ur4agQ" Name="beta" Value="((1-(tbl_imv_surv[2;1]))*(((1-(tbl_imv_surv[2;1]))*(tbl_imv_surv[2;1]))/((tbl_imv_surv[2;2])^2)-1))"/>
     </Distribution>
+    <Distribution xmi:id="_YJEHQLHzEe2ISbHRA_YM_g" NameID="d_LTDmortalityHR" Label="hazard ratio for mortality with longterm disability" Comment="" Index="70">
+      <Parameter xmi:id="_YJEuULHzEe2ISbHRB-YM_g" Name="subtype" Value="1"/>
+      <Parameter xmi:id="_YJEuUbHzEe2ISbHRB-YM_g" Name="mean" Value="ln(ltdmortality_hr_mean)"/>
+      <Parameter xmi:id="_YJEuUrHzEe2ISbHRB-YM_g" Name="stddev" Value="ltdmortality_hr_sd"/>
+    </Distribution>
+    <Distribution xmi:id="_o1DFELLzEe2ISbHRfgYM_g" NameID="d_dischargeSurvival" Label="" Comment="" Index="73" SamplingRate="Sample1stOrderTrials" Type="Weibull">
+      <Parameter xmi:id="_o1DFEbLzEe2ISbHRfgYM_g" Name="subtype" Value="1"/>
+      <Parameter xmi:id="_o1DFErLzEe2ISbHRfgYM_g" Name="scalefactor" Value="1/((dischargeSurvival_finalscale)^(d_dischargeSurvival_shape))"/>
+      <Parameter xmi:id="_o1DFE7LzEe2ISbHRfgYM_g" Name="shape" Value="d_dischargeSurvival_shape"/>
+    </Distribution>
+    <Distribution xmi:id="_o1E6QLLzEe2ISbHRfgYM_g" NameID="d_dischargeSurvival_ageHR" Label="" Comment="" Index="74" Type="LogNormal">
+      <Parameter xmi:id="_o1E6QbLzEe2ISbHRgfYM_g" Name="subtype" Value="1"/>
+      <Parameter xmi:id="_o1E6QrLzEe2ISbHRgfYM_g" Name="umeanoflogs" Value="log(dischargeSurvival_ageHR_mean)"/>
+      <Parameter xmi:id="_o1E6Q7LzEe2ISbHRgfYM_g" Name="sigmastddevoflogs" Value="dischargeSurvival_ageHR_sd"/>
+    </Distribution>
+    <Distribution xmi:id="_o1FhULLzEe2ISbHRgfYM_g" NameID="d_dischargeSurvival_scale" Label="" Comment="" Index="72">
+      <Parameter xmi:id="_o1FhUbLzEe2ISbHRgfYM_g" Name="subtype" Value="1"/>
+      <Parameter xmi:id="_o1FhUrLzEe2ISbHRheYM_g" Name="mean" Value="dischargeSurvival_scale_mean"/>
+      <Parameter xmi:id="_o1FhU7LzEe2ISbHRheYM_g" Name="stddev" Value="dischargeSurvival_scale_sd"/>
+    </Distribution>
+    <Distribution xmi:id="_o1GIYLLzEe2ISbHRheYM_g" NameID="d_dischargeSurvival_shape" Label="" Comment="" Index="71">
+      <Parameter xmi:id="_7TD4gLLzEe2ISbHRvQYM_g" Name="subtype" Value="1"/>
+      <Parameter xmi:id="_7TD4gbLzEe2ISbHRvQYM_g" Name="mean" Value="dischargeSurvival_shape_mean"/>
+      <Parameter xmi:id="_7TD4grLzEe2ISbHRvQYM_g" Name="stddev" Value="dischargeSurvival_shape_sd"/>
+    </Distribution>
     <Variable xmi:id="_YhCZCKPGEe2d9qs9Ur4agQ" NameID="p_survival" Label="" Comment=""/>
     <Variable xmi:id="_YhCZCaPGEe2d9qs9Vq4agQ" NameID="p_imv" Label="" Comment=""/>
     <Variable xmi:id="_YhCZCqPGEe2d9qs9Vq4agQ" NameID="p_ltd" Label="" Comment=""/>
@@ -601,6 +638,15 @@
     <Variable xmi:id="_YhCZYKPGEe2d9qs9mZ4agQ" NameID="c_ward5" Label="" Comment=""/>
     <Variable xmi:id="_YhCZYaPGEe2d9qs9mZ4agQ" NameID="c_recovery_18to64_iterationMean" Label="" Comment=""/>
     <Variable xmi:id="_YhCZYqPGEe2d9qs9mZ4agQ" NameID="c_recovery_65plus_iterationMean" Label="" Comment=""/>
+    <Variable xmi:id="_qEJz0LHzEe2ISbHRC9YM_g" NameID="ltdmortality_hr_mean" Label="" Comment=""/>
+    <Variable xmi:id="_qENeMLHzEe2ISbHRC9YM_g" NameID="ltdmortality_hr_sd" Label="" Comment=""/>
+    <Variable xmi:id="_sQLIILLzEe2ISbHRidYM_g" NameID="dischargeSurvival_ageHR_mean" Label="" Comment=""/>
+    <Variable xmi:id="_sQNkYLLzEe2ISbHRidYM_g" NameID="dischargeSurvival_ageHR_sd" Label="" Comment=""/>
+    <Variable xmi:id="_sQPZkLLzEe2ISbHRjcYM_g" NameID="dischargeSurvival_finalscale" Label="" Comment=""/>
+    <Variable xmi:id="_sQROwLLzEe2ISbHRjcYM_g" NameID="dischargeSurvival_scale_mean" Label="" Comment=""/>
+    <Variable xmi:id="_sQTD8LLzEe2ISbHRjcYM_g" NameID="dischargeSurvival_scale_sd" Label="" Comment=""/>
+    <Variable xmi:id="_sQVgMLLzEe2ISbHRkbYM_g" NameID="dischargeSurvival_shape_mean" Label="" Comment=""/>
+    <Variable xmi:id="_sQXVYLLzEe2ISbHRkbYM_g" NameID="dischargeSurvival_shape_sd" Label="" Comment=""/>
     <Tracker xmi:id="_YhCZY6PGEe2d9qs9nY4agQ" NameID="t_survive" Label="" Comment="" DefaultValue="1.0"/>
     <Tracker xmi:id="_YhCZZKPGEe2d9qs9nY4agQ" NameID="t_imv" Label="" Comment=""/>
     <Tracker xmi:id="_YhCZZaPGEe2d9qs9nY4agQ" NameID="t_OxygenDuration" Label="" Comment=""/>
@@ -1115,51 +1161,51 @@
       <ColumnLabel>Value 2</ColumnLabel>
     </Table>
     <CategoriesRoot xmi:id="_YhC_lKPGEe2d9qs9C94agQ"/>
-    <PreferenceSet xmi:id="_Q4SFMKPlEe2d9qs9zM4agQ" NameID="Pref. set 1">
-      <Preference xmi:id="_Q4SFMaPlEe2d9qs9zM4agQ" Name="locale" Value="en_CA"/>
-      <Preference xmi:id="_Q4SFMqPlEe2d9qs9zM4agQ" Name="useCustomPayoffNames" Value="true"/>
-      <Preference xmi:id="_Q4SFM6PlEe2d9qs90L4agQ" Name="numberOfEnabledPayoffs" Value="5"/>
-      <Preference xmi:id="_Q4SFNKPlEe2d9qs90L4agQ" Name="calcType" Value="ct_costEff"/>
-      <Preference xmi:id="_Q4SFNaPlEe2d9qs90L4agQ" Name="ceCostPayoff" Value="1"/>
-      <Preference xmi:id="_Q4SFNqPlEe2d9qs90L4agQ" Name="ceEffPayoff" Value="2"/>
-      <Preference xmi:id="_Q4SFN6PlEe2d9qs90L4agQ" Name="calculateExtraPayoffs" Value="true"/>
-      <Preference xmi:id="_Q4SFOKPlEe2d9qs91K4agQ" Name="allowPayoffsPriorToTerminalNodes" Value="true"/>
-      <Preference xmi:id="_Q4SFOaPlEe2d9qs91K4agQ" Name="TrackerShowInRankingst_survive28d" Value="false"/>
-      <Preference xmi:id="_Q4SFOqPlEe2d9qs91K4agQ" Name="TrackerShowInRankingst_imv28d" Value="false"/>
-      <Preference xmi:id="_Q4SFO6PlEe2d9qs91K4agQ" Name="TrackerShowInRankingst_icuduration" Value="false"/>
-      <Preference xmi:id="_Q4SFPKPlEe2d9qs91K4agQ" Name="TrackerShowInRankingst_imvduration" Value="false"/>
-      <Preference xmi:id="_Q4SFPaPlEe2d9qs92J4agQ" Name="TrackerShowInRankingst_hospitalduration" Value="false"/>
-      <Preference xmi:id="_Q4SFPqPlEe2d9qs92J4agQ" Name="TrackerShowInRankingst_ltd" Value="false"/>
-      <Preference xmi:id="_Q4SFP6PlEe2d9qs92J4agQ" Name="TrackerShowInRankingst_lifespan" Value="false"/>
-      <Preference xmi:id="_Q4SFQKPlEe2d9qs92J4agQ" Name="TrackerShowInRankingst_currentage" Value="false"/>
-      <Preference xmi:id="_Q4SFQaPlEe2d9qs92J4agQ" Name="customPayoffName1" Value="Cost"/>
-      <Preference xmi:id="_Q4SFQqPlEe2d9qs93I4agQ" Name="customPayoffName2" Value="Effectiveness"/>
-      <Preference xmi:id="_Q4SFQ6PlEe2d9qs93I4agQ" Name="customPayoffName3" Value="Longterm disability"/>
-      <Preference xmi:id="_Q4SFRKPlEe2d9qs93I4agQ" Name="customPayoffName4" Value="IMV duration"/>
-      <Preference xmi:id="_Q4SFRaPlEe2d9qs93I4agQ" Name="customPayoffName5" Value="Life expectancy"/>
-      <Preference xmi:id="_Q4SFRqPlEe2d9qs93I4agQ" Name="monteNumTrials" Value="1000"/>
-      <Preference xmi:id="_Q4SFR6PlEe2d9qs94H4agQ" Name="seedStabilizeStrategies" Value="false"/>
-      <Preference xmi:id="_Q4SFSKPlEe2d9qs94H4agQ" Name="monteSumTrialSets" Value="false"/>
-      <Preference xmi:id="_Q4SFSaPlEe2d9qs94H4agQ" Name="timeReportPayoffs" Value="1,2,3,4,5"/>
-      <Preference xmi:id="_Q4SFSqPlEe2d9qs94H4agQ" Name="timeReportDistributions" Value="1,2,3,4,5,6,7,8,9,10,11,12"/>
-      <Preference xmi:id="_Q4SFS6PlEe2d9qs94H4agQ" Name="timeReportTrackers" Value="t_survive28d,t_imv28d,t_imvduration,t_hospitalduration,t_ltd,t_lifespan,t_currentage"/>
-      <Preference xmi:id="_Q4SFTKPlEe2d9qs95G4agQ" Name="timeReportsEnabled" Value="false"/>
-      <Preference xmi:id="_Q4SFTaPlEe2d9qs95G4agQ" Name="timeReportSkipNodeID" Value="false"/>
-      <Preference xmi:id="_Q4SFTqPlEe2d9qs95G4agQ" Name="TrackerShowInRankingsthreshold" Value="false"/>
-      <Preference xmi:id="_Q4SFT6PlEe2d9qs95G4agQ" Name="TrackerShowInRankingst_female" Value="false"/>
-      <Preference xmi:id="_Q4SFUKPlEe2d9qs95G4agQ" Name="TrackerShowInRankingsd_beta_imv" Value="false"/>
-      <Preference xmi:id="_Q4SFUaPlEe2d9qs96F4agQ" Name="TrackerShowInRankingslambda_w_imv" Value="false"/>
-      <Preference xmi:id="_Q4SFUqPlEe2d9qs96F4agQ" Name="TrackerShowInRankingsbeta_imv_intercept" Value="false"/>
-      <Preference xmi:id="_Q4SFU6PlEe2d9qs96F4agQ" Name="TrackerShowInRankingsbeta_imv_death" Value="false"/>
-      <Preference xmi:id="_Q4SFVKPlEe2d9qs96F4agQ" Name="TrackerShowInRankingsbeta_imv_age" Value="false"/>
-      <Preference xmi:id="_Q4SFVaPlEe2d9qs96F4agQ" Name="TrackerShowInRankingsbeta_imv_sex" Value="false"/>
-      <Preference xmi:id="_Q4SFVqPlEe2d9qs97E4agQ" Name="monteNumSamples" Value="1000"/>
-      <Preference xmi:id="_Q4SFV6PlEe2d9qs97E4agQ" Name="monteRunTrials" Value="true"/>
-      <Preference xmi:id="_Q4SFWKPlEe2d9qs97E4agQ" Name="seedStabilize1stOrder" Value="false"/>
-      <Preference xmi:id="_Q4SFWaPlEe2d9qs97E4agQ" Name="setNumberOfThreads" Value="true"/>
-      <Preference xmi:id="_Q4SFWqPlEe2d9qs97E4agQ" Name="numberOfThreads" Value="8"/>
-      <Preference xmi:id="_klDKwKPlEe2d9qs98D4agQ" Name="compatibilityFeature_distByNames" Value="Distribution references by name|2017 R2.0"/>
-      <Preference xmi:id="_klE_8KPlEe2d9qs98D4agQ" Name="compatibilityFeature_pertFeature" Value="PERT distribution|2020 R1.0"/>
+    <PreferenceSet xmi:id="_TYg1kLL0Ee2ISbHR5GYM_g" NameID="Pref. set 1">
+      <Preference xmi:id="_TYg1kbL0Ee2ISbHR5GYM_g" Name="locale" Value="en_CA"/>
+      <Preference xmi:id="_TYg1krL0Ee2ISbHR6FYM_g" Name="useCustomPayoffNames" Value="true"/>
+      <Preference xmi:id="_TYg1k7L0Ee2ISbHR6FYM_g" Name="numberOfEnabledPayoffs" Value="5"/>
+      <Preference xmi:id="_TYg1lLL0Ee2ISbHR6FYM_g" Name="calcType" Value="ct_costEff"/>
+      <Preference xmi:id="_TYg1lbL0Ee2ISbHR6FYM_g" Name="ceCostPayoff" Value="1"/>
+      <Preference xmi:id="_TYg1lrL0Ee2ISbHR6FYM_g" Name="ceEffPayoff" Value="2"/>
+      <Preference xmi:id="_TYg1l7L0Ee2ISbHR7EYM_g" Name="calculateExtraPayoffs" Value="true"/>
+      <Preference xmi:id="_TYg1mLL0Ee2ISbHR7EYM_g" Name="allowPayoffsPriorToTerminalNodes" Value="true"/>
+      <Preference xmi:id="_TYg1mbL0Ee2ISbHR7EYM_g" Name="TrackerShowInRankingst_survive28d" Value="false"/>
+      <Preference xmi:id="_TYg1mrL0Ee2ISbHR7EYM_g" Name="TrackerShowInRankingst_imv28d" Value="false"/>
+      <Preference xmi:id="_TYg1m7L0Ee2ISbHR7EYM_g" Name="TrackerShowInRankingst_icuduration" Value="false"/>
+      <Preference xmi:id="_TYg1nLL0Ee2ISbHR8DYM_g" Name="TrackerShowInRankingst_imvduration" Value="false"/>
+      <Preference xmi:id="_TYg1nbL0Ee2ISbHR8DYM_g" Name="TrackerShowInRankingst_hospitalduration" Value="false"/>
+      <Preference xmi:id="_TYg1nrL0Ee2ISbHR8DYM_g" Name="TrackerShowInRankingst_ltd" Value="false"/>
+      <Preference xmi:id="_TYg1n7L0Ee2ISbHR8DYM_g" Name="TrackerShowInRankingst_lifespan" Value="false"/>
+      <Preference xmi:id="_TYg1oLL0Ee2ISbHR8DYM_g" Name="TrackerShowInRankingst_currentage" Value="false"/>
+      <Preference xmi:id="_TYg1obL0Ee2ISbHR9CYM_g" Name="customPayoffName1" Value="Cost"/>
+      <Preference xmi:id="_TYg1orL0Ee2ISbHR9CYM_g" Name="customPayoffName2" Value="Effectiveness"/>
+      <Preference xmi:id="_TYg1o7L0Ee2ISbHR9CYM_g" Name="customPayoffName3" Value="Longterm disability"/>
+      <Preference xmi:id="_TYg1pLL0Ee2ISbHR9CYM_g" Name="customPayoffName4" Value="IMV duration"/>
+      <Preference xmi:id="_TYg1pbL0Ee2ISbHR9CYM_g" Name="customPayoffName5" Value="Life expectancy"/>
+      <Preference xmi:id="_TYg1prL0Ee2ISbHR-BYM_g" Name="monteNumTrials" Value="1000"/>
+      <Preference xmi:id="_TYg1p7L0Ee2ISbHR-BYM_g" Name="seedStabilizeStrategies" Value="false"/>
+      <Preference xmi:id="_TYg1qLL0Ee2ISbHR-BYM_g" Name="monteSumTrialSets" Value="false"/>
+      <Preference xmi:id="_TYg1qbL0Ee2ISbHR-BYM_g" Name="timeReportPayoffs" Value="1,2,3,4,5"/>
+      <Preference xmi:id="_TYg1qrL0Ee2ISbHR-BYM_g" Name="timeReportDistributions" Value="1,2,3,4,5,6,7,8,9,10,11,12"/>
+      <Preference xmi:id="_TYg1q7L0Ee2ISbHR_AYM_g" Name="timeReportTrackers" Value="t_survive28d,t_imv28d,t_imvduration,t_hospitalduration,t_ltd,t_lifespan,t_currentage"/>
+      <Preference xmi:id="_TYg1rLL0Ee2ISbHR_AYM_g" Name="timeReportsEnabled" Value="false"/>
+      <Preference xmi:id="_TYg1rbL0Ee2ISbHR_AYM_g" Name="timeReportSkipNodeID" Value="false"/>
+      <Preference xmi:id="_TYg1rrL0Ee2ISbHR_AYM_g" Name="TrackerShowInRankingsthreshold" Value="false"/>
+      <Preference xmi:id="_TYg1r7L0Ee2ISbHR_AYM_g" Name="TrackerShowInRankingst_female" Value="false"/>
+      <Preference xmi:id="_TYg1sLL0Ee2ISbHRA_YM_g" Name="TrackerShowInRankingsd_beta_imv" Value="false"/>
+      <Preference xmi:id="_TYg1sbL0Ee2ISbHRA_YM_g" Name="TrackerShowInRankingslambda_w_imv" Value="false"/>
+      <Preference xmi:id="_TYg1srL0Ee2ISbHRA_YM_g" Name="TrackerShowInRankingsbeta_imv_intercept" Value="false"/>
+      <Preference xmi:id="_TYg1s7L0Ee2ISbHRA_YM_g" Name="TrackerShowInRankingsbeta_imv_death" Value="false"/>
+      <Preference xmi:id="_TYg1tLL0Ee2ISbHRA_YM_g" Name="TrackerShowInRankingsbeta_imv_age" Value="false"/>
+      <Preference xmi:id="_TYg1tbL0Ee2ISbHRB-YM_g" Name="TrackerShowInRankingsbeta_imv_sex" Value="false"/>
+      <Preference xmi:id="_TYg1trL0Ee2ISbHRB-YM_g" Name="monteNumSamples" Value="1000"/>
+      <Preference xmi:id="_TYg1t7L0Ee2ISbHRB-YM_g" Name="monteRunTrials" Value="true"/>
+      <Preference xmi:id="_TYg1uLL0Ee2ISbHRB-YM_g" Name="seedStabilize1stOrder" Value="false"/>
+      <Preference xmi:id="_TYg1ubL0Ee2ISbHRB-YM_g" Name="setNumberOfThreads" Value="true"/>
+      <Preference xmi:id="_TYg1urL0Ee2ISbHRC9YM_g" Name="numberOfThreads" Value="8"/>
+      <Preference xmi:id="_geRK4LL0Ee2ISbHRC9YM_g" Name="compatibilityFeature_distByNames" Value="Distribution references by name|2017 R2.0"/>
+      <Preference xmi:id="_geRK4bL0Ee2ISbHRC9YM_g" Name="compatibilityFeature_pertFeature" Value="PERT distribution|2020 R1.0"/>
     </PreferenceSet>
   </tree:Tree>
   <notation:Diagram xmi:id="_YhC_wqPGEe2d9qs9L04agQ" type="TreeDocument" element="#_YhCXYKPGEe2d9qs9A_4agQ" measurementUnit="Himetric">

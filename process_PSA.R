@@ -12,7 +12,7 @@ psa <- read_csv("PSA.csv",skip = 2)
 # mortality and imv 
 
 mortality_columns <- which(grepl("t_survive", names(psa)))
-imv_columns <- 23:26
+imv_columns <- 27:30
 ltd_columns <- which(grepl("Longterm disability", names(psa)))
 le_columns <-  which(grepl("Life expectancy", names(psa)))
 imvdur_columns <-  which(grepl("t_imvduration", names(psa)))
@@ -175,14 +175,16 @@ ggsave("figures/Figure1jointCEAC.svg", height = 8, width = 7)
 
 
 # EVPPI
-
-savi_parameters(psa) %>%
+psa[,-c(19:22)] %>%
+savi_parameters() %>%
   write_csv("savi_parameters.csv")
 
-savi_costs(psa) %>%
+psa[,-c(19:22)] %>%
+savi_costs() %>%
   write_csv("savi_costs.csv")
 
-savi_effectiveness(psa) %>%
+psa[,-c(19:22)] %>%
+savi_effectiveness() %>%
   write_csv("savi_effectiveness.csv")
 
 # use SAVI web interface and save as EVPPI_mimic.csv
@@ -230,7 +232,7 @@ ggsave("figures/Figure2EVPPI.svg", width = 8, height = 4)
 
 
 
-EVSI <- 121535
+EVSI <- 
 
 I_t <- 5000
 
