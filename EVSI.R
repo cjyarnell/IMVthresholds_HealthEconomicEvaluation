@@ -13,8 +13,8 @@ c_blue = "cornflower blue"
 library(mgcv)
 library(tidyverse)
 
-# MIMIC 
-PSA <- read_csv("PSA.csv", skip = 2)[,-c(19:22)]
+# Primary scenario 
+PSA <- read_csv("PSA_simple.csv", skip = 2)
 
 sample_sizes <- c(100, 200, 400, 800, 1600, 3200)
 
@@ -23,12 +23,12 @@ EVSI <- data.frame(N = sample_sizes,
                    EVSI = NA)
 
 for (n in 1:nrow(EVSI)){
-  EVSI$EVSI[n] = evsi_rct(PSA, EVSI$N[n])
-  saveRDS(EVSI, "evsi.rds")
+  EVSI$EVSI[n] = evsi_rct_simple(PSA, EVSI$N[n])
+  saveRDS(EVSI, "evsi_simple.rds")
 }
 
 # figure
-readRDS("evsi.rds") %>%
+readRDS("evsi_simple.rds") %>%
   mutate(source = factor(source, levels = c("MIMIC-IV","AmsterdamUMCdb"),
                          labels = c("Primary Analysis", "Sensitivity Analysis"))) %>%
   mutate(popEVSI = pop_evsi(EVSI = EVSI)) %>%
@@ -53,7 +53,7 @@ readRDS("evsi.rds") %>%
 
 ggsave(filename = "figures/EVSI.svg", width = 6, height = 6, units = "in")
 
-# MIMIC 
+# Secondary scenario 
 PSA_s <- read_csv("PSA_sensitivity.csv", skip = 2)
 
 sample_sizes <- c(100, 200, 400, 800, 1600, 3200)
@@ -66,6 +66,7 @@ for (n in 1:nrow(EVSI_sens)){
   EVSI_sens$EVSI[n] = evsi_rct_sens(PSA_s, EVSI_sens$N[n])
   saveRDS(EVSI_sens, "evsi_sens.rds")
 }
+
 
 # figure
 readRDS("evsi_sens.rds") %>%
@@ -94,13 +95,13 @@ readRDS("evsi_sens.rds") %>%
 ggsave(filename = "figures/EVSI.svg", width = 6, height = 6, units = "in")
 
 
-bind_rows(readRDS("evsi.rds"), 
+bind_rows(readRDS("evsi_simple.rds"), 
           readRDS("evsi_sens.rds"),
           .id = "Scenario") %>%
   mutate(Scenario = factor(Scenario,
                            levels = c(1,2),
-                           labels = c("Scenario 1: a 4-arm trial showing early invasive ventilation is beneficial",
-                                      "Scenario 2: a 2-arm trial showing late invasive ventilation is safe")))  %>%
+                           labels = c("Scenario 1: early invasive ventilation is beneficial",
+                                      "Scenario 2: late invasive ventilation is safe")))  %>%
   mutate(popEVSI = pop_evsi(EVSI = EVSI)) %>%
   ggplot(aes(x = N, y = popEVSI/1e9)) +
   geom_col(aes(fill = Scenario)) +
@@ -126,6 +127,87 @@ bind_rows(readRDS("evsi.rds"),
   labs(y = "Population EVSI (CAD, billions)",
        x = "Total sample size of trial")
 
-ggsave("figures/evsi_both.svg", units = "in", width = 6, height = 6)
+ggsave("figures/evsi_both_simple.svg", units = "in", width = 7, height = 5)
+ggsave("figures/evsi_both_simple.pdf", units = "in", width = 7, height = 5)
+
+# Lollipop plot
+
+c_navy <- "#001A49"
+c_ice  <- "#AAC0CE"
+
+bind_rows(readRDS("evsi_simple.rds"), 
+          readRDS("evsi_sens.rds"),
+          .id = "Scenario") %>%
+  mutate(Scenario = factor(Scenario,
+                           levels = c(1,2),
+                           labels = c("Primary scenario: early invasive ventilation beneficial",
+                                      "Secondary scenario: late invasive ventilation safe")))  %>%
+  mutate(popEVSI = pop_evsi(EVSI = EVSI)) %>%
+  ggplot() +
+  geom_point(aes(x = N, y = popEVSI/1e9,
+                 color = Scenario), size = 7) +
+  geom_segment(aes(x = N, xend=N, 
+                   y = 0,
+                   yend = popEVSI/1e9,
+                   color = Scenario),
+               size = 2) +
+  scale_color_manual(values = c(c_navy, c_ice),
+                    name = "Scenario",
+                    labels = 1:2,
+                    guide = "none") +
+  facet_wrap(Scenario~., nrow = 1, scales = "free_x") +
+  theme_minimal() +
+  scale_x_continuous(trans = "log2", breaks = sample_sizes) +
+  scale_y_continuous(expand = c(0,0), limits = c(0,3)) +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        axis.line.x = element_line(colour = 'black', size=0.5, linetype='solid'),
+        axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid'),
+        axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+        axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0))) +
+  labs(y = "Population EVSI (CAD, billions)",
+       x = "Total sample size of trial")
+
+# Lollipop plot
+
+c_navy <- "#001A49"
+c_ice  <- "#AAC0CE"
+
+bind_rows(readRDS("evsi_simple.rds"), 
+          readRDS("evsi_sens.rds"),
+          .id = "Scenario") %>%
+  mutate(Scenario = factor(Scenario,
+                           levels = c(1,2),
+                           labels = c("Primary scenario: early invasive ventilation beneficial",
+                                      "Secondary scenario: late invasive ventilation safe")))  %>%
+  mutate(popEVSI = pop_evsi(EVSI = EVSI)) %>%
+  ggplot() +
+  geom_point(aes(x = N, y = EVSI/1e3,
+                 color = Scenario), size = 7) +
+  geom_segment(aes(x = N, xend=N, 
+                   y = 0,
+                   yend = EVSI/1e3,
+                   color = Scenario),
+               size = 2) +
+  scale_color_manual(values = c(c_navy, c_ice),
+                     name = "Scenario",
+                     labels = 1:2,
+                     guide = "none") +
+  facet_wrap(Scenario~., nrow = 1, scales = "free_x") +
+  theme_minimal() +
+  scale_x_continuous(trans = "log2", breaks = sample_sizes) +
+  scale_y_continuous(expand = c(0,0), limits = c(0,75)) +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        axis.line.x = element_line(colour = 'black', size=0.5, linetype='solid'),
+        axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid'),
+        axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+        axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0))) +
+  labs(y = "Per-patient EVSI (CAD, thousands)",
+       x = "Total sample size of trial")
+
+
+ggsave("figures/bluecolor_evsi_perpt_simple.svg", units = "in", width = 7, height = 5)
+ggsave("figures/bluecolor_evsi_perpt_simple.pdf", units = "in", width = 7, height = 5)
 
 
