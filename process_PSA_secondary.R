@@ -158,13 +158,13 @@ ggsave("figures/FigureCEAC_secondary.svg", width = 7, height = 5)
 # EVPPI
 
 savi_parameters_sensitivity(psa) %>%
-  write_csv("savi_parameters_sensitivity.csv")
+  write_csv("savi_parameters_secondary.csv")
 
 savi_costs_sensitivity(psa) %>%
-  write_csv("savi_costs_sensitivity.csv")
+  write_csv("savi_costs_secondary.csv")
 
 savi_effectiveness_sensitivity(psa) %>%
-  write_csv("savi_effectiveness_sensitivity.csv")
+  write_csv("savi_effectiveness_secondary.csv")
 
 # use SAVI web interface and save as EVPPI_secondary.csv
 

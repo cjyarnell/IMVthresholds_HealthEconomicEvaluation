@@ -176,15 +176,15 @@ ggsave("figures/Figure1jointCEAC.pdf", height = 8, width = 6)
 # EVPPI
 psa %>%
 savi_parameters_simple() %>%
-  write_csv("savi_parameters_simple.csv")
+  write_csv("savi_parameters_primary.csv")
 
 psa %>%
 savi_costs_simple() %>%
-  write_csv("savi_costs_simple.csv")
+  write_csv("savi_costs_primary.csv")
 
 psa %>%
 savi_effectiveness_simple() %>%
-  write_csv("savi_effectiveness_simple.csv")
+  write_csv("savi_effectiveness_primary.csv")
 
 # use SAVI web interface and save as EVPPI_simple.csv
 # then run EVSI_simple.R
